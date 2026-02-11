@@ -16,11 +16,21 @@ interface Order {
 export default function AccountPage() {
     const { user } = useAuth();
     const [profile, setProfile] = useState({
-        name: 'John Doe',
-        email: user?.email || 'john@example.com'
+        name: user?.displayName || 'Valued Customer',
+        email: user?.email || 'customer@example.com'
     });
     const [isEditing, setIsEditing] = useState(false);
     const [tempUser, setTempUser] = useState(profile);
+
+    // Update profile state when user object becomes available
+    useEffect(() => {
+        if (user) {
+            setProfile({
+                name: user.displayName || 'Valued Customer',
+                email: user.email || ''
+            });
+        }
+    }, [user]);
     const [orders, setOrders] = useState<Order[]>([]);
     const [message, setMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
