@@ -44,7 +44,7 @@ export default function CheckoutPage() {
                 customerEmail: formData.email,
                 customerName: `${formData.firstName} ${formData.lastName}`,
                 items: cart.map(item => ({
-                    id: item.id,
+                    id: item.id!,
                     name: item.name,
                     price: item.price,
                     quantity: item.quantity,
@@ -178,7 +178,7 @@ export default function CheckoutPage() {
             <div className={styles.summarySection}>
                 <h2 className={styles.summaryTitle}>Order Summary</h2>
                 {cart.map(item => (
-                    <div key={item.id} className={styles.orderItem}>
+                    <div key={item.id!} className={styles.orderItem}>
                         <span>{item.name} x {item.quantity}</span>
                         <span>${(item.price * item.quantity).toLocaleString()}</span>
                     </div>

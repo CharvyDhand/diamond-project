@@ -1,19 +1,4 @@
-export interface Product {
-    id: string;
-    name: string;
-    price: number;
-    category: 'rings' | 'necklaces' | 'earrings' | 'bracelets';
-    image: string;
-    description: string;
-    specs: {
-        carat?: string;
-        clarity?: string;
-        color?: string;
-        cut?: string;
-        metal?: string;
-    };
-    featured?: boolean;
-}
+import { Product } from '@/lib/db';
 
 export const products: Product[] = [
     // ... Existing products with unique IDs ...

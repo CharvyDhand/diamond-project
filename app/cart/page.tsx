@@ -50,7 +50,7 @@ export default function CartPage() {
                                 <div className={styles.quantityControls}>
                                     <button
                                         className={styles.qtyBtn}
-                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                        onClick={() => updateQuantity(item.id!, item.quantity - 1)}
                                         disabled={item.quantity <= 1}
                                     >
                                         <Minus size={14} />
@@ -58,7 +58,7 @@ export default function CartPage() {
                                     <span>{item.quantity}</span>
                                     <button
                                         className={styles.qtyBtn}
-                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                        onClick={() => updateQuantity(item.id!, item.quantity + 1)}
                                     >
                                         <Plus size={14} />
                                     </button>
@@ -67,7 +67,7 @@ export default function CartPage() {
 
                             <button
                                 className={styles.removeBtn}
-                                onClick={() => removeFromCart(item.id)}
+                                onClick={() => removeFromCart(item.id!)}
                                 aria-label="Remove item"
                             >
                                 <Trash2 size={18} />

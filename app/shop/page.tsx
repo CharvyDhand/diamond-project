@@ -98,7 +98,7 @@ export default function Shop() {
 
                 <div className={styles.productGrid}>
                     {filteredProducts.map(product => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard key={product.id!} product={product} />
                     ))}
                     {!loading && filteredProducts.length === 0 && (
                         <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#64748b' }}>
