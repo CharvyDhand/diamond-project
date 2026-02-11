@@ -60,14 +60,16 @@ export default function OrdersPage() {
     };
 
     const getStatusColor = (status: Order['status']) => {
-        const colors = {
+        const colors: Record<string, { bg: string, text: string }> = {
             pending: { bg: '#fef3c7', text: '#92400e' },
             processing: { bg: '#dbeafe', text: '#1e40af' },
             completed: { bg: '#dcfce7', text: '#166534' },
             shipped: { bg: '#e0e7ff', text: '#3730a3' },
             cancelled: { bg: '#fee2e2', text: '#991b1b' },
+            return_requested: { bg: '#fef3c7', text: '#92400e' },
+            refund_requested: { bg: '#e0e7ff', text: '#3730a3' },
         };
-        return colors[status] || colors.pending;
+        return colors[status as string] || colors.pending;
     };
 
     const formatDate = (timestamp: any) => {
