@@ -91,7 +91,8 @@ export interface Order {
     subtotal: number;
     tax: number;
     total: number;
-    status: 'pending' | 'processing' | 'completed' | 'shipped' | 'cancelled';
+    status: 'pending' | 'processing' | 'completed' | 'shipped' | 'cancelled' | 'return_requested' | 'refund_requested';
+    reason?: string;
     shippingAddress: ShippingAddress;
     paymentMethod: string;
     paymentId?: string;

@@ -9,7 +9,7 @@ interface Order {
     id: string;
     date: string;
     total: string;
-    status: 'Processing' | 'Delivered' | 'Cancelled' | 'Return Requested' | 'Refund Requested';
+    status: 'pending' | 'processing' | 'completed' | 'shipped' | 'cancelled' | 'return_requested' | 'refund_requested';
     reason?: string;
 }
 
@@ -27,8 +27,8 @@ export default function AccountPage() {
 
     // Initial Orders Data (fallback)
     const initialOrders: Order[] = [
-        { id: 'ORD-7329', date: 'February 14, 2024', total: '$3,500.00', status: 'Processing' },
-        { id: 'ORD-7110', date: 'January 28, 2024', total: '$1,200.00', status: 'Delivered' }
+        { id: 'ORD-7329', date: 'February 14, 2024', total: '$3,500.00', status: 'processing' },
+        { id: 'ORD-7110', date: 'January 28, 2024', total: '$1,200.00', status: 'completed' }
     ];
 
     useEffect(() => {
@@ -41,7 +41,7 @@ export default function AccountPage() {
                         const formattedOrders = firestoreOrders.map(o => ({
                             id: o.id || '',
                             date: new Date(o.createdAt?.seconds * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                            total: `$${o.totalAmount.toFixed(2)}`,
+                            total: `$${o.total.toFixed(2)}`,
                             status: o.status,
                             reason: o.reason
                         }));
@@ -99,7 +99,7 @@ export default function AccountPage() {
             const reason = prompt('Please tell us why you are cancelling this order:');
             if (reason !== null) {
                 const updatedOrders = orders.map(order =>
-                    order.id === orderId ? { ...order, status: 'Cancelled' as const, reason: reason } : order
+                    order.id === orderId ? { ...order, status: 'cancelled' as const, reason: reason } : order
                 );
                 setOrders(updatedOrders);
                 localStorage.setItem('luxe-orders', JSON.stringify(updatedOrders));
@@ -110,11 +110,13 @@ export default function AccountPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'Processing': return { bg: '#dcfce7', color: '#166534' }; // Green
-            case 'Delivered': return { bg: '#dbeafe', color: '#1e40af' }; // Blue
-            case 'Cancelled': return { bg: '#fee2e2', color: '#991b1b' }; // Red
-            case 'Return Requested': return { bg: '#fef3c7', color: '#92400e' }; // Amber
-            case 'Refund Requested': return { bg: '#e0e7ff', color: '#3730a3' }; // Indigo
+            case 'pending': return { bg: '#fef3c7', color: '#92400e' }; // Amber
+            case 'processing': return { bg: '#dcfce7', color: '#166534' }; // Green
+            case 'completed': return { bg: '#dbeafe', color: '#1e40af' }; // Blue
+            case 'shipped': return { bg: '#e0e7ff', color: '#3730a3' }; // Indigo
+            case 'cancelled': return { bg: '#fee2e2', color: '#991b1b' }; // Red
+            case 'return_requested': return { bg: '#fef3c7', color: '#92400e' }; // Amber
+            case 'refund_requested': return { bg: '#e0e7ff', color: '#3730a3' }; // Indigo
             default: return { bg: '#f3f4f6', color: '#374151' }; // Gray
         }
     };
@@ -181,7 +183,7 @@ export default function AccountPage() {
                                     <div>
                                         <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Order #{order.id}</div>
                                         <div style={{ fontSize: '0.9rem', color: '#64748b' }}>{order.date}</div>
-                                        {order.status === 'Processing' && (
+                                        {(order.status === 'processing' || order.status === 'pending') && (
                                             <button
                                                 onClick={() => handleCancelOrder(order.id)}
                                                 className="btn btn-secondary"
@@ -190,7 +192,7 @@ export default function AccountPage() {
                                                 Cancel & Refund
                                             </button>
                                         )}
-                                        {order.status === 'Delivered' && (
+                                        {order.status === 'completed' && (
                                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                                                 <Link
                                                     href={`/account/requests?orderId=${order.id}&type=return`}
