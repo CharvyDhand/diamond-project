@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import styles from '../../about/About.module.css'; // Reusing layout styles
 
+import { updateOrderStatus } from '@/lib/db';
+
 // Component that wraps search params logic
 function RequestForm() {
     const router = useRouter();
@@ -22,7 +24,7 @@ function RequestForm() {
         if (actionType) setSelectedAction(actionType);
     }, [actionType]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!reason.trim()) {
@@ -30,29 +32,23 @@ function RequestForm() {
             return;
         }
 
+        if (!orderId) return;
+
         setIsSubmitting(true);
 
-        // Simulate network delay and update local storage
-        setTimeout(() => {
-            const savedOrders = localStorage.getItem('luxe-orders');
-            if (savedOrders) {
-                const orders = JSON.parse(savedOrders);
-                const updatedOrders = orders.map((order: any) => {
-                    if (order.id === orderId) {
-                        return {
-                            ...order,
-                            status: selectedAction === 'return' ? 'Return Requested' : 'Refund Requested',
-                            reason: reason
-                        };
-                    }
-                    return order;
-                });
-                localStorage.setItem('luxe-orders', JSON.stringify(updatedOrders));
-                localStorage.setItem('luxe-action-success', `Successfully submitted ${selectedAction} request for ${orderId}`);
-            }
+        try {
+            const status = selectedAction === 'return' ? 'return_requested' : 'refund_requested';
+            await updateOrderStatus(orderId, status as any, reason);
 
+            // Set success message for account page
+            localStorage.setItem('luxe-action-success', `Successfully submitted ${selectedAction} request for order #${orderId}`);
             router.push('/account');
-        }, 1000);
+        } catch (error) {
+            console.error('Error submitting request:', error);
+            alert('Failed to submit request. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (!orderId) {

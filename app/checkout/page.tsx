@@ -8,18 +8,28 @@ import type { ShippingAddress } from '@/lib/db';
 import styles from './Checkout.module.css';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
+import { useAuth } from '@/context/AuthContext';
+
 export default function CheckoutPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const { cart, cartTotal, clearCart } = useCart();
     const [isProcessing, setIsProcessing] = useState(false);
     const [showPayPal, setShowPayPal] = useState(false);
+
+    // split displayName into first and last name if possible
+    const displayName = user?.displayName || '';
+    const nameParts = displayName.split(' ');
+    const initialFirstName = nameParts[0] || '';
+    const initialLastName = nameParts.slice(1).join(' ') || '';
+
     const [formData, setFormData] = useState<ShippingAddress>({
-        firstName: '',
-        lastName: '',
+        firstName: initialFirstName,
+        lastName: initialLastName,
         address: '',
         city: '',
         postalCode: '',
-        email: '',
+        email: user?.email || '',
     });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

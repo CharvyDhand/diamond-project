@@ -5,13 +5,19 @@ import { CheckCircle } from 'lucide-react';
 import styles from './OrderConfirmation.module.css';
 import { useEffect, useState } from 'react';
 
-export default function OrderConfirmation() {
-    const [orderId, setOrderId] = useState('');
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+
+function ConfirmationDetails() {
+    const searchParams = useSearchParams();
+    const urlOrderId = searchParams.get('orderId');
+    const [orderId, setOrderId] = useState(urlOrderId || '');
 
     useEffect(() => {
-        // Generate random order ID
-        setOrderId('ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase());
-    }, []);
+        if (!urlOrderId) {
+            setOrderId('ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase());
+        }
+    }, [urlOrderId]);
 
     return (
         <div className={styles.confirmationContainer}>
@@ -39,8 +45,16 @@ export default function OrderConfirmation() {
 
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                 <Link href="/" className="btn">Continue Shopping</Link>
-                <Link href="/track-order" className="btn btn-secondary">Track Order</Link>
+                <Link href="/account" className="btn btn-secondary">Go to Account</Link>
             </div>
         </div>
+    );
+}
+
+export default function OrderConfirmation() {
+    return (
+        <Suspense fallback={<div>Loading confirmation...</div>}>
+            <ConfirmationDetails />
+        </Suspense>
     );
 }

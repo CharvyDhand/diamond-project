@@ -33,29 +33,56 @@ export interface Product {
     featured?: boolean;
 }
 
+import { products as staticProducts } from '@/data/products';
+
 // Get all products
 export async function getProducts(): Promise<Product[]> {
-    const productsCol = collection(db, 'products');
-    const productSnapshot = await getDocs(productsCol);
-    return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    try {
+        const productsCol = collection(db, 'products');
+        const productSnapshot = await getDocs(productsCol);
+        if (productSnapshot.empty) {
+            return staticProducts;
+        }
+        return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    } catch (error) {
+        console.error('Error fetching products from Firestore:', error);
+        return staticProducts;
+    }
 }
 
 // Get products by category
 export async function getProductsByCategory(category: string): Promise<Product[]> {
-    const productsCol = collection(db, 'products');
-    const q = query(productsCol, where('category', '==', category));
-    const productSnapshot = await getDocs(q);
-    return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    try {
+        const productsCol = collection(db, 'products');
+        const q = query(productsCol, where('category', '==', category));
+        const productSnapshot = await getDocs(q);
+        if (productSnapshot.empty) {
+            return staticProducts.filter(p => p.category === category);
+        }
+        return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    } catch (error) {
+        console.error('Error fetching products by category:', error);
+        return staticProducts.filter(p => p.category === category);
+    }
 }
 
 // Get single product
 export async function getProduct(id: string): Promise<Product | null> {
-    const productDoc = doc(db, 'products', id);
-    const productSnapshot = await getDoc(productDoc);
-    if (productSnapshot.exists()) {
-        return { id: productSnapshot.id, ...productSnapshot.data() } as Product;
+    try {
+        const productDoc = doc(db, 'products', id);
+        const productSnapshot = await getDoc(productDoc);
+        if (productSnapshot.exists()) {
+            return { id: productSnapshot.id, ...productSnapshot.data() } as Product;
+        }
+
+        // Fallback to static data if not in Firestore (for development/legacy IDs)
+        const staticProduct = staticProducts.find(p => p.id === id);
+        return staticProduct || null;
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        const staticProduct = staticProducts.find(p => p.id === id);
+        return staticProduct || null;
     }
-    return null;
 }
 
 // Add product (Admin only)
@@ -138,13 +165,15 @@ export async function getOrder(orderId: string): Promise<Order | null> {
     return null;
 }
 
-// Update order status
-export async function updateOrderStatus(orderId: string, status: Order['status']): Promise<void> {
+// Update order status with optional reason
+export async function updateOrderStatus(orderId: string, status: Order['status'], reason?: string): Promise<void> {
     const orderDoc = doc(db, 'orders', orderId);
-    await updateDoc(orderDoc, {
+    const updates: any = {
         status,
         updatedAt: Timestamp.now()
-    });
+    };
+    if (reason) updates.reason = reason;
+    await updateDoc(orderDoc, updates);
 }
 
 // ADMIN: Update product

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getUserOrders } from '@/lib/db';
+import { getUserOrders, updateOrderStatus } from '@/lib/db';
 
 interface Order {
     id: string;
@@ -31,46 +31,39 @@ export default function AccountPage() {
             });
         }
     }, [user]);
+    // Initial empty state for orders
     const [orders, setOrders] = useState<Order[]>([]);
     const [message, setMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-
-    // Initial Orders Data (fallback)
-    const initialOrders: Order[] = [
-        { id: 'ORD-7329', date: 'February 14, 2024', total: '$3,500.00', status: 'processing' },
-        { id: 'ORD-7110', date: 'January 28, 2024', total: '$1,200.00', status: 'completed' }
-    ];
 
     useEffect(() => {
         const loadOrders = async () => {
             if (user) {
                 // Try to load from Firestore
                 try {
-                    const firestoreOrders = await getUserOrders(user.uid);
-                    if (firestoreOrders.length > 0) {
+                    console.log('Fetching orders for email:', user.email);
+                    const firestoreOrders = await getUserOrders(user.email || ''); // Using email as user identifier in lib/db.ts
+
+                    if (firestoreOrders && firestoreOrders.length > 0) {
                         const formattedOrders = firestoreOrders.map(o => ({
                             id: o.id || '',
-                            date: new Date(o.createdAt?.seconds * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-                            total: `$${o.total.toFixed(2)}`,
+                            date: o.createdAt?.seconds
+                                ? new Date(o.createdAt.seconds * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                                : 'Recent Order',
+                            total: `$${o.total.toLocaleString()}`,
                             status: o.status,
                             reason: o.reason
                         }));
                         setOrders(formattedOrders);
-                        setLoading(false);
-                        return;
+                    } else {
+                        setOrders([]);
                     }
                 } catch (error) {
-                    console.log('Firestore orders not available, using localStorage');
+                    console.error('Error loading Firestore orders:', error);
+                    setOrders([]);
                 }
-            }
-
-            // Fallback to localStorage
-            const savedOrders = localStorage.getItem('luxe-orders');
-            if (savedOrders) {
-                setOrders(JSON.parse(savedOrders));
             } else {
-                setOrders(initialOrders);
-                localStorage.setItem('luxe-orders', JSON.stringify(initialOrders));
+                setOrders([]);
             }
             setLoading(false);
         };
@@ -104,16 +97,23 @@ export default function AccountPage() {
         setTempUser({ ...tempUser, [e.target.name]: e.target.value });
     };
 
-    const handleCancelOrder = (orderId: string) => {
+    const handleCancelOrder = async (orderId: string) => {
         if (confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
             const reason = prompt('Please tell us why you are cancelling this order:');
             if (reason !== null) {
-                const updatedOrders = orders.map(order =>
-                    order.id === orderId ? { ...order, status: 'cancelled' as const, reason: reason } : order
-                );
-                setOrders(updatedOrders);
-                localStorage.setItem('luxe-orders', JSON.stringify(updatedOrders));
-                alert('Order cancelled successfully. A refund has been initiated.');
+                try {
+                    await updateOrderStatus(orderId, 'cancelled', reason);
+
+                    // Update local state to show cancelled status immediately
+                    setOrders(prev => prev.map(order =>
+                        order.id === orderId ? { ...order, status: 'cancelled', reason: reason } : order
+                    ));
+
+                    alert('Order cancelled successfully. A refund has been initiated.');
+                } catch (error) {
+                    console.error('Error cancelling order:', error);
+                    alert('Failed to cancel order. Please try again.');
+                }
             }
         }
     };
