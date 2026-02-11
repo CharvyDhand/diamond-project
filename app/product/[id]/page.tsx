@@ -1,8 +1,10 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { products } from '@/data/products';
+import { getProduct } from '@/lib/db';
+import type { Product } from '@/lib/db';
 import { useCart } from '@/context/CartContext';
 import styles from './ProductDetails.module.css';
 import { ArrowLeft } from 'lucide-react';
@@ -11,14 +13,38 @@ import Link from 'next/link';
 export default function ProductPage() {
     const params = useParams();
     const router = useRouter();
+    const [product, setProduct] = useState<Product | null>(null);
+    const [loading, setLoading] = useState(true);
     const { addToCart } = useCart();
 
-    const product = products.find(p => p.id === params.id);
+    useEffect(() => {
+        async function loadProduct() {
+            if (params.id) {
+                try {
+                    const data = await getProduct(params.id as string);
+                    setProduct(data);
+                } catch (error) {
+                    console.error('Error loading product:', error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        }
+        loadProduct();
+    }, [params.id]);
+
+    if (loading) {
+        return (
+            <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
+                <p>Loading gem details...</p>
+            </div>
+        );
+    }
 
     if (!product) {
         return (
             <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
-                <h2>Product not found</h2>
+                <h2>Gem not found</h2>
                 <Link href="/shop" style={{ textDecoration: 'underline', marginTop: '1rem', display: 'block' }}>
                     Back to Shop
                 </Link>
@@ -28,7 +54,6 @@ export default function ProductPage() {
 
     const handleAddToCart = () => {
         addToCart(product);
-        // Optional: show toast or feedback
         alert('Added to cart!');
     };
 
@@ -58,38 +83,40 @@ export default function ProductPage() {
                     <p className={styles.price}>${product.price.toLocaleString()}</p>
                     <p className={styles.description}>{product.description}</p>
 
-                    <div className={styles.specsContainer}>
-                        {product.specs.carat && (
-                            <div className={styles.specRow}>
-                                <span className={styles.specLabel}>Carat Weight</span>
-                                <span className={styles.specValue}>{product.specs.carat}</span>
-                            </div>
-                        )}
-                        {product.specs.color && (
-                            <div className={styles.specRow}>
-                                <span className={styles.specLabel}>Color</span>
-                                <span className={styles.specValue}>{product.specs.color}</span>
-                            </div>
-                        )}
-                        {product.specs.clarity && (
-                            <div className={styles.specRow}>
-                                <span className={styles.specLabel}>Clarity</span>
-                                <span className={styles.specValue}>{product.specs.clarity}</span>
-                            </div>
-                        )}
-                        {product.specs.cut && (
-                            <div className={styles.specRow}>
-                                <span className={styles.specLabel}>Cut</span>
-                                <span className={styles.specValue}>{product.specs.cut}</span>
-                            </div>
-                        )}
-                        {product.specs.metal && (
-                            <div className={styles.specRow}>
-                                <span className={styles.specLabel}>Metal</span>
-                                <span className={styles.specValue}>{product.specs.metal}</span>
-                            </div>
-                        )}
-                    </div>
+                    {product.specs && (
+                        <div className={styles.specsContainer}>
+                            {product.specs.carat && (
+                                <div className={styles.specRow}>
+                                    <span className={styles.specLabel}>Carat Weight</span>
+                                    <span className={styles.specValue}>{product.specs.carat}</span>
+                                </div>
+                            )}
+                            {product.specs.color && (
+                                <div className={styles.specRow}>
+                                    <span className={styles.specLabel}>Color</span>
+                                    <span className={styles.specValue}>{product.specs.color}</span>
+                                </div>
+                            )}
+                            {product.specs.clarity && (
+                                <div className={styles.specRow}>
+                                    <span className={styles.specLabel}>Clarity</span>
+                                    <span className={styles.specValue}>{product.specs.clarity}</span>
+                                </div>
+                            )}
+                            {product.specs.cut && (
+                                <div className={styles.specRow}>
+                                    <span className={styles.specLabel}>Cut</span>
+                                    <span className={styles.specValue}>{product.specs.cut}</span>
+                                </div>
+                            )}
+                            {product.specs.metal && (
+                                <div className={styles.specRow}>
+                                    <span className={styles.specLabel}>Metal</span>
+                                    <span className={styles.specValue}>{product.specs.metal}</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className={styles.actions}>
