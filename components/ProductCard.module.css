@@ -1,0 +1,81 @@
+.card {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: white;
+    position: relative;
+}
+
+.card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transform: translateY(-5px);
+}
+
+.imageContainer {
+    position: relative;
+    aspect-ratio: 1;
+    background-color: #f8fafc;
+    overflow: hidden;
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.card:hover .image {
+    transform: scale(1.05);
+}
+
+.content {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.category {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.name {
+    font-size: 1.1rem;
+    font-family: var(--font-heading);
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+}
+
+.price {
+    font-weight: 500;
+    color: var(--color-secondary);
+    font-size: 1rem;
+}
+
+.viewBtn {
+    margin-top: 1rem;
+    width: 100%;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    padding: 10px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.card:hover .viewBtn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.viewBtn:hover {
+    background-color: var(--color-primary);
+    color: white;
+}

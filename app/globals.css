@@ -1,0 +1,104 @@
+:root {
+  /* Sage & Beige Luxury Palette */
+  --color-primary: #778873;
+  /* Dark Sage */
+  --color-secondary: #A1BC98;
+  /* Medium Sage */
+  --color-accent: #D2DCB6;
+  /* Light Sage */
+  --color-text-main: #2c3e2e;
+  /* Dark Green/Black for text */
+  --color-text-muted: #5f6f5b;
+  --color-background: #F1F3E0;
+  /* Light Beige */
+  --color-surface: #ffffff;
+  /* Keeping surface white for contrast on beige bg, or maybe D2DCB6? Let's use white for cards to pop against F1F3E0 */
+  --color-surface-alt: #D2DCB6;
+
+  /* Borders */
+  --border-color: #A1BC98;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 4rem;
+
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  color: var(--color-text-main);
+  background: var(--color-background);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+/* Utility Classes */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+.section {
+  padding: var(--spacing-xl) 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  background-color: var(--color-primary);
+  color: white;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.875rem;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
